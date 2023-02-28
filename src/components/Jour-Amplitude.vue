@@ -1,6 +1,11 @@
 <template>
   <div class="wrapper">
-    <h1>{{ jour }}</h1>
+    <h1>
+      {{ jour }}
+      <span v-if="dateJour"
+        >{{ dateJour }} / {{ dateMonth }} / {{ dateYear }}</span
+      >
+    </h1>
     <div class="donnees">
       <section class="debut">
         <div>
@@ -30,7 +35,6 @@
 
       <section class="fin">
         <h2>Fin de journée</h2>
-
         <div>
           <input v-model="heureFin" id="heure" type="number" ref="input3" />
           <label for="heure">H</label>
@@ -113,7 +117,7 @@
       </section>
 
       <section class="resume">
-        <div class="resultat">
+        <div v-if="finCalcHeuresEnMinutes > 0" class="resultat">
           <h4>
             <p>Voici votre Amplitude</p>
             <span
@@ -133,7 +137,18 @@
           </h4>
         </div>
         <div>
-          <button @click="enregistrerDataJour" class="btn-save">
+          <button
+            @click="
+              store.saveLundi({
+                day: 'lundi',
+                date: '12/12/2023',
+                year: 2023,
+                month: 'december',
+                amplitude: amplitudeCalc.toFixed(2),
+              })
+            "
+            class="btn-save"
+          >
             Valider et enregistrer
           </button>
         </div>
@@ -143,11 +158,16 @@
 </template>
 
 <script>
+import { store } from "./store.js";
+
 export default {
   name: "Jour-Amplitude",
   props: {
     jour: String,
     semaine: Number,
+    dateJour: String,
+    dateMonth: Number,
+    dateYear: Number,
   },
   watch: {
     heureDebut(newHeureDebut, oldHeureDebut) {
@@ -172,6 +192,7 @@ export default {
 
   data() {
     return {
+      store: store,
       date: "",
       heureDebut: "",
       minutesDebut: "",
@@ -246,7 +267,7 @@ export default {
       if (this.amplitudeCalc) {
         this.amplitude = this.amplitudeCalc.toFixed(2);
       }
-      console.log(this.amplitude);
+      this.$emit("sendDataJour", this.amplitudeCalc.toFixed(2));
     },
   },
 };
@@ -273,6 +294,7 @@ h1 {
 }
 .panierRepas button.btn-main {
   cursor: pointer;
+  margin-top: 1em;
   padding: 1em;
   background-color: #f3ca20;
   border-radius: 10px;
@@ -294,6 +316,7 @@ button.btn-save {
   border: 0;
   color: #fff;
   text-transform: uppercase;
+  margin-bottom: 1em;
 }
 
 .wrapper {
@@ -319,9 +342,8 @@ section.debut {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 70px;
-
-  padding-bottom: 1em;
+  height: 100%;
+  padding-bottom: 0;
   border-radius: var(--radius-amount);
   background-color: var(--debut-journee-bgcolor);
 }
@@ -344,8 +366,8 @@ input[type="number"] {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 70px;
-  padding-bottom: 1em;
+  height: 100%;
+  padding-bottom: 10px;
   border-radius: var(--radius-amount);
   background-color: var(--debut-journee-bgcolor);
 }
@@ -365,7 +387,8 @@ section.pauseRepas {
   flex-direction: column;
   align-items: center;
   color: var(--pause-repas-textColor);
-  padding: 1em;
+  padding: 0;
+  padding-bottom: 15px;
   margin: 0;
   border: 1px solid rgba(0, 0, 0, 0.2);
   text-align: left;
@@ -376,6 +399,7 @@ section.pauseRepas {
 section.pauseRepas h3 {
   display: inline-block;
   width: 100%;
+  text-align: center;
   font-weight: 300;
   font-size: 12px;
 }
@@ -419,6 +443,7 @@ section.pause h3 {
 section.pause span {
   margin-top: 10px;
   font-size: 12px;
+  color: #f3ca20;
 }
 
 section.resume {
@@ -475,5 +500,13 @@ section.resume {
     rgba(255, 255, 255, 0.3) 35%,
     rgba(255, 255, 255, 0) 70%
   );
+}
+
+@media screen and (min-width: 900px) {
+  .wrapper {
+    width: 80%;
+    margin: 0 auto;
+    margin-bottom: 1em;
+  }
 }
 </style>
